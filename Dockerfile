@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install build dependencies for compiling better-sqlite3
+RUN apk add --no-cache python3 make g++ sqlite-dev
+
 # Optimization: Copy only dependency files first
 COPY package*.json ./
 
@@ -13,6 +16,9 @@ COPY tsconfig.json ./
 COPY src ./src
 
 RUN npm run build
+
+# Remove development dependencies to keep production node_modules clean
+RUN npm prune --production
 
 # Stage 2: Production
 FROM node:20-alpine AS production
@@ -26,12 +32,10 @@ WORKDIR /app
 RUN addgroup -g 1001 appgroup && \
     adduser -u 1001 -G appgroup -s /bin/sh -D appuser
 
-# Only copy production dependencies
-COPY package*.json ./
-RUN npm ci --only=production
-
-# Copy compiled assets from builder
+# Copy production node_modules and compiled assets from builder
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY package*.json ./
 
 # Create directory for SQLite data and set permissions
 RUN mkdir -p /app/data && chown -R appuser:appgroup /app/data
