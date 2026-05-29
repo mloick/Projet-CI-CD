@@ -22,7 +22,13 @@ export class JournalService {
     return this.journalRepository.findByUserId(userId);
   }
 
-  public async getDailySummary(userId: string) {
+  public async getDailySummary(userId: string): Promise<{
+    userId: string;
+    date: string;
+    consumed: { calories: number; protein: number; carbs: number; fat: number };
+    target: { calories: number; macros: { protein: number; carbs: number; fat: number } };
+    remaining: { calories: number; protein: number; carbs: number; fat: number };
+  }> {
     const plan = await this.nutritionService.generatePlan(userId);
     const meals = await this.journalRepository.findByUserIdAndDate(userId, new Date());
 

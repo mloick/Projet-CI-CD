@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Counter, Histogram, Gauge, register } from 'prom-client';
+import { Counter, Histogram, Gauge } from 'prom-client';
 
 // Métriques
 export const httpRequestsTotal = new Counter({

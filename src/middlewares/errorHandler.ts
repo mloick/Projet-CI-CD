@@ -23,7 +23,7 @@ export const errorHandler = (
   err: Error | CustomError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   const logger = Logger.getInstance();
   const statusCode = err instanceof CustomError ? err.statusCode : 500;
