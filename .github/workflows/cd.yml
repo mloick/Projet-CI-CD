@@ -23,8 +23,19 @@ jobs:
       - name: Pull, Retag and Push Staging
         run: |
           IMAGE_ID=ghcr.io/${GITHUB_REPOSITORY,,}
-          # On récupère l'image buildée par le workflow CI (sha)
-          docker pull $IMAGE_ID:${{ github.sha }}
+          # On attend que l'image soit disponible (buildée par le workflow CI)
+          for i in {1..40}; do
+            if docker pull $IMAGE_ID:${{ github.sha }}; then
+              echo "Image successfully pulled!"
+              break
+            fi
+            echo "Waiting for image to be built (attempt $i)..."
+            sleep 15
+            if [ $i -eq 40 ]; then
+              echo "Timeout waiting for docker image."
+              exit 1
+            fi
+          done
           docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:staging
           docker push $IMAGE_ID:staging
 
@@ -43,8 +54,19 @@ jobs:
       - name: Pull, Retag and Push Production
         run: |
           IMAGE_ID=ghcr.io/${GITHUB_REPOSITORY,,}
-          # En prod on tag latest et avec le tag git
-          docker pull $IMAGE_ID:${{ github.sha }}
+          # On attend que l'image soit disponible (buildée par le workflow CI)
+          for i in {1..40}; do
+            if docker pull $IMAGE_ID:${{ github.sha }}; then
+              echo "Image successfully pulled!"
+              break
+            fi
+            echo "Waiting for image to be built (attempt $i)..."
+            sleep 15
+            if [ $i -eq 40 ]; then
+              echo "Timeout waiting for docker image."
+              exit 1
+            fi
+          done
           docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:latest
           docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:${{ github.ref_name }}
           docker push $IMAGE_ID:latest
