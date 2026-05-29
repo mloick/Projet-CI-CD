@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull, Retag and Push Staging
         run: |
-          IMAGE_ID=ghcr.io/${{ github.repository }}
+          IMAGE_ID=ghcr.io/${GITHUB_REPOSITORY,,}
           # On récupère l'image buildée par le workflow CI (sha)
           docker pull $IMAGE_ID:${{ github.sha }}
           docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:staging
@@ -43,7 +43,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull, Retag and Push Production
         run: |
-          IMAGE_ID=ghcr.io/${{ github.repository }}
+          IMAGE_ID=ghcr.io/${GITHUB_REPOSITORY,,}
           # En prod on tag latest et avec le tag git
           docker pull $IMAGE_ID:${{ github.sha }}
           docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:latest
