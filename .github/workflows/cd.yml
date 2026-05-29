@@ -1,0 +1,52 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull, Retag and Push Staging
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository }}
+          # On récupère l'image buildée par le workflow CI (sha)
+          docker pull $IMAGE_ID:${{ github.sha }}
+          docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:staging
+          docker push $IMAGE_ID:staging
+
+  production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull, Retag and Push Production
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository }}
+          # En prod on tag latest et avec le tag git
+          docker pull $IMAGE_ID:${{ github.sha }}
+          docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:latest
+          docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:${{ github.ref_name }}
+          docker push $IMAGE_ID:latest
+          docker push $IMAGE_ID:${{ github.ref_name }}
