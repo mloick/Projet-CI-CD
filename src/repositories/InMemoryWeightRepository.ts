@@ -10,6 +10,6 @@ export class InMemoryWeightRepository implements IWeightRepository {
   }
 
   async findByUserId(userId: string): Promise<WeightEntry[]> {
-    return this.entries.filter(e => e.userId === userId);
+    return this.entries.filter((e) => e.userId === userId);
   }
 }

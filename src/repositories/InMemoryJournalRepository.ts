@@ -10,14 +10,13 @@ export class InMemoryJournalRepository implements IJournalRepository {
   }
 
   async findByUserId(userId: string): Promise<MealEntry[]> {
-    return this.meals.filter(m => m.userId === userId);
+    return this.meals.filter((m) => m.userId === userId);
   }
 
   async findByUserIdAndDate(userId: string, date: Date): Promise<MealEntry[]> {
     const targetDate = date.toISOString().split('T')[0];
-    return this.meals.filter(m => 
-      m.userId === userId && 
-      m.timestamp.toISOString().split('T')[0] === targetDate
+    return this.meals.filter(
+      (m) => m.userId === userId && m.timestamp.toISOString().split('T')[0] === targetDate
     );
   }
 }

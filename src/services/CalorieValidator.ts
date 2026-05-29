@@ -7,12 +7,16 @@ export class CalorieValidator {
 
   public static validate(targetCalories: number, tdee: number): void {
     if (targetCalories < this.MIN_CALORIES) {
-      throw new Error(`Validation Error: Target calories (${targetCalories}) cannot be below ${this.MIN_CALORIES} kcal/day.`);
+      throw new Error(
+        `Validation Error: Target calories (${targetCalories}) cannot be below ${this.MIN_CALORIES} kcal/day.`
+      );
     }
 
     const surplus = targetCalories - tdee;
     if (surplus > this.MAX_SURPLUS) {
-      this.logger.warn(`Security Alert: High calorie surplus detected (${surplus} kcal). Recommendation: decrease target.`);
+      this.logger.warn(
+        `Security Alert: High calorie surplus detected (${surplus} kcal). Recommendation: decrease target.`
+      );
     }
   }
 }

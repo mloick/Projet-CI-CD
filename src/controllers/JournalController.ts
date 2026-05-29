@@ -13,7 +13,11 @@ export class JournalController {
     }
   };
 
-  public getDailySummary = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getDailySummary = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const summary = await this.journalService.getDailySummary(req.params.userId);
       res.status(200).json(summary);

@@ -6,7 +6,9 @@ import { NotFoundError } from '../middlewares/errorHandler';
 export class UserService {
   constructor(private userRepository: IUserRepository) {}
 
-  public async createProfile(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserProfile> {
+  public async createProfile(
+    data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<UserProfile> {
     const profile: UserProfile = {
       ...data,
       id: uuidv4(),

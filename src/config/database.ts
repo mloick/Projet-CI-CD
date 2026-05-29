@@ -20,7 +20,7 @@ export class DatabaseConnection {
 
       DatabaseConnection.instance = new Database(dbPath);
       DatabaseConnection.logger.info(`Connected to SQLite database at ${dbPath}`);
-      
+
       DatabaseConnection.initializeSchema();
     }
     return DatabaseConnection.instance;
@@ -28,7 +28,7 @@ export class DatabaseConnection {
 
   private static initializeSchema(): void {
     const db = DatabaseConnection.instance;
-    
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,

@@ -28,17 +28,19 @@ export class SQLiteUserRepository implements IUserRepository {
 
   async findById(id: string): Promise<UserProfile | null> {
     const stmt = this.db.prepare('SELECT * FROM users WHERE id = ?');
-    const row = stmt.get(id) as {
-      id: string;
-      age: number;
-      weight: number;
-      height: number;
-      gender: string;
-      activity_level: string;
-      goal: string;
-      created_at: string;
-      updated_at: string;
-    } | undefined;
+    const row = stmt.get(id) as
+      | {
+          id: string;
+          age: number;
+          weight: number;
+          height: number;
+          gender: string;
+          activity_level: string;
+          goal: string;
+          created_at: string;
+          updated_at: string;
+        }
+      | undefined;
 
     if (!row) return null;
 

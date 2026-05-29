@@ -13,7 +13,7 @@ export class NutritionService {
   public async getBmr(userId: string): Promise<number> {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new NotFoundError('User not found');
-    
+
     return this.calorieCalculator.calculateBmr(user);
   }
 

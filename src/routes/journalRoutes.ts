@@ -17,7 +17,11 @@ const nutritionService = new NutritionService(userRepository, calorieCalculator)
 const journalService = new JournalService(journalRepository, nutritionService);
 const journalController = new JournalController(journalService);
 
-router.post('/', validateRequest(['userId', 'name', 'calories', 'protein', 'carbs', 'fat']), journalController.logMeal);
+router.post(
+  '/',
+  validateRequest(['userId', 'name', 'calories', 'protein', 'carbs', 'fat']),
+  journalController.logMeal
+);
 router.get('/:userId/today', journalController.getDailySummary);
 router.get('/:userId', journalController.getHistory);
 

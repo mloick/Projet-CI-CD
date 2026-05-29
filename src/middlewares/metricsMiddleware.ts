@@ -28,7 +28,7 @@ export const appErrorsTotal = new Counter({
 
 export const metricsMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const start = process.hrtime();
-  
+
   // Incrémenter les requêtes en cours
   httpRequestsInFlight.inc();
 
@@ -41,7 +41,7 @@ export const metricsMiddleware = (req: Request, res: Response, next: NextFunctio
     // Enregistrer les métriques de fin de requête
     httpRequestsTotal.labels(req.method, route, statusCode).inc();
     httpRequestDurationSeconds.labels(req.method, route, statusCode).observe(durationInSeconds);
-    
+
     // Décrémenter les requêtes en cours
     httpRequestsInFlight.dec();
 

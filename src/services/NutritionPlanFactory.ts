@@ -3,12 +3,7 @@ import { Goal } from '../models/UserProfile';
 import { CalorieValidator } from './CalorieValidator';
 
 export class NutritionPlanFactory {
-  public static create(
-    userId: string,
-    goal: Goal,
-    bmr: number,
-    tdee: number
-  ): NutritionPlan {
+  public static create(userId: string, goal: Goal, bmr: number, tdee: number): NutritionPlan {
     let targetCalories: number;
     let proteinPct: number;
     let carbsPct: number;
@@ -18,19 +13,19 @@ export class NutritionPlanFactory {
       case 'cut':
         targetCalories = tdee * 0.8; // -20%
         proteinPct = 0.35;
-        carbsPct = 0.40;
+        carbsPct = 0.4;
         fatPct = 0.25;
         break;
       case 'bulk':
         targetCalories = tdee * 1.1; // +10%
-        proteinPct = 0.30;
-        carbsPct = 0.50;
-        fatPct = 0.20;
+        proteinPct = 0.3;
+        carbsPct = 0.5;
+        fatPct = 0.2;
         break;
       case 'maintain':
       default:
         targetCalories = tdee;
-        proteinPct = 0.30;
+        proteinPct = 0.3;
         carbsPct = 0.45;
         fatPct = 0.25;
         break;

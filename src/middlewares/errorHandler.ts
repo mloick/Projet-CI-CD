@@ -2,7 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { Logger } from '../config/logger';
 
 export class CustomError extends Error {
-  constructor(public message: string, public statusCode: number) {
+  constructor(
+    public message: string,
+    public statusCode: number
+  ) {
     super(message);
   }
 }
@@ -30,7 +33,7 @@ export const errorHandler = (
   const message = err.message || 'Internal Server Error';
 
   logger.error(`${statusCode} - ${message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
-  
+
   if (statusCode === 500) {
     logger.error(err.stack);
   }
