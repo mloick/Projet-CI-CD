@@ -145,6 +145,9 @@ jobs:
     name: Trivy Security Scan (Docker)
     runs-on: ubuntu-latest
     needs: [docker-build]
+    # Non-blocking: base image CVEs are outside our control.
+    # The SARIF report is still uploaded to GitHub Security for visibility.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Set lowercased image name

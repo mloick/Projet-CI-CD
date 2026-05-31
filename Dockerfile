@@ -28,6 +28,9 @@ LABEL version="1.0.0"
 
 WORKDIR /app
 
+# Patch all Alpine packages to fix known CVEs (libssl, musl, etc.)
+RUN apk upgrade --no-cache
+
 # Create non-root user
 RUN addgroup -g 1001 appgroup && \
     adduser -u 1001 -G appgroup -s /bin/sh -D appuser
