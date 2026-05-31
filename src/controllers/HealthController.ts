@@ -6,7 +6,7 @@ export class HealthController {
     let dbStatus = 'connected';
     try {
       DatabaseConnection.getInstance().prepare('SELECT 1').get();
-    } catch (err) {
+    } catch {
       dbStatus = 'disconnected';
     }
 

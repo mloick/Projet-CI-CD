@@ -1,8 +1,13 @@
 name: CD Pipeline
 
 on:
+  # Triggers only AFTER CI Pipeline completes — eliminates the race condition
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main]
+  # Manual production deploy or tag-based release
   push:
-    branches: [ main ]
     tags:
       - 'v*'
   workflow_dispatch:
@@ -11,33 +16,28 @@ jobs:
   staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    # Only deploy staging when CI succeeded on main
+    if: |
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success'
     environment: staging
     steps:
-      - uses: actions/checkout@v4
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Pull, Retag and Push Staging
+      - name: Retag image as :staging
+        env:
+          IMAGE_ID: ghcr.io/${{ github.repository }}
+          # Use the SHA from the CI run, not the CD workflow SHA
+          BUILD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          IMAGE_ID=ghcr.io/${GITHUB_REPOSITORY,,}
-          # On attend que l'image soit disponible (buildée par le workflow CI)
-          for i in {1..40}; do
-            if docker pull $IMAGE_ID:${{ github.sha }}; then
-              echo "Image successfully pulled!"
-              break
-            fi
-            echo "Waiting for image to be built (attempt $i)..."
-            sleep 15
-            if [ $i -eq 40 ]; then
-              echo "Timeout waiting for docker image."
-              exit 1
-            fi
-          done
-          docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:staging
-          docker push $IMAGE_ID:staging
+          IMAGE_ID=$(echo "$IMAGE_ID" | tr '[:upper:]' '[:lower:]')
+          docker pull "$IMAGE_ID:$BUILD_SHA"
+          docker tag  "$IMAGE_ID:$BUILD_SHA" "$IMAGE_ID:staging"
+          docker push "$IMAGE_ID:staging"
+          echo "Deployed $IMAGE_ID:$BUILD_SHA → $IMAGE_ID:staging"
 
   production:
     name: Deploy to Production
@@ -45,29 +45,20 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     environment: production
     steps:
-      - uses: actions/checkout@v4
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Pull, Retag and Push Production
+      - name: Retag image as :latest and :<tag>
+        env:
+          IMAGE_ID: ghcr.io/${{ github.repository }}
+          BUILD_SHA: ${{ github.sha }}
         run: |
-          IMAGE_ID=ghcr.io/${GITHUB_REPOSITORY,,}
-          # On attend que l'image soit disponible (buildée par le workflow CI)
-          for i in {1..40}; do
-            if docker pull $IMAGE_ID:${{ github.sha }}; then
-              echo "Image successfully pulled!"
-              break
-            fi
-            echo "Waiting for image to be built (attempt $i)..."
-            sleep 15
-            if [ $i -eq 40 ]; then
-              echo "Timeout waiting for docker image."
-              exit 1
-            fi
-          done
-          docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:latest
-          docker tag $IMAGE_ID:${{ github.sha }} $IMAGE_ID:${{ github.ref_name }}
-          docker push $IMAGE_ID:latest
-          docker push $IMAGE_ID:${{ github.ref_name }}
+          IMAGE_ID=$(echo "$IMAGE_ID" | tr '[:upper:]' '[:lower:]')
+          docker pull "$IMAGE_ID:$BUILD_SHA"
+          docker tag  "$IMAGE_ID:$BUILD_SHA" "$IMAGE_ID:latest"
+          docker tag  "$IMAGE_ID:$BUILD_SHA" "$IMAGE_ID:${{ github.ref_name }}"
+          docker push "$IMAGE_ID:latest"
+          docker push "$IMAGE_ID:${{ github.ref_name }}"
+          echo "Deployed $IMAGE_ID:$BUILD_SHA → latest + ${{ github.ref_name }}"
