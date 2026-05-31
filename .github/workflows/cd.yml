@@ -12,6 +12,10 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   staging:
     name: Deploy to Staging
