@@ -1,0 +1,54 @@
+---
+- name: Create Docker network
+  community.docker.docker_network:
+    name: "{{ app_network }}"
+    state: present
+
+- name: Create Docker volume for persistent data
+  community.docker.docker_volume:
+    name: "{{ app_data_volume }}"
+    state: present
+
+- name: Pull latest Docker image
+  community.docker.docker_image:
+    name: "{{ app_image }}:{{ app_tag }}"
+    source: pull
+    force_source: true
+
+- name: Deploy application container
+  community.docker.docker_container:
+    name: "{{ app_container_name }}"
+    image: "{{ app_image }}:{{ app_tag }}"
+    state: started
+    restart_policy: always
+    networks:
+      - name: "{{ app_network }}"
+    ports:
+      - "{{ app_port }}:3000"
+    volumes:
+      - "{{ app_data_volume }}:/app/data"
+    env:
+      NODE_ENV: "{{ app_env }}"
+      PORT: "3000"
+      DATABASE_PATH: "/app/data/calorie-tracker.db"
+      LOG_LEVEL: "{{ app_log_level }}"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+- name: Wait for application to be healthy
+  uri:
+    url: "http://localhost:{{ app_port }}/health"
+    method: GET
+    status_code: 200
+  register: health_check
+  until: health_check.status == 200
+  retries: 10
+  delay: 3
+
+- name: Print deployed version
+  debug:
+    msg: "Calorie Tracker API deployed: {{ app_image }}:{{ app_tag }} → http://localhost:{{ app_port }}"

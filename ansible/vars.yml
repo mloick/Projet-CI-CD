@@ -1,0 +1,10 @@
+---
+# Application variables — override at runtime with -e key=value
+app_image: "ghcr.io/mloick/projet-ci-cd"
+app_tag: "latest"
+app_port: 3000
+app_container_name: "calorie-api"
+app_network: "calorie-network"
+app_data_volume: "calorie-data"
+app_env: "production"
+app_log_level: "info"
