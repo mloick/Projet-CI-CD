@@ -1,0 +1,18 @@
+---
+# Ansible Playbook — Deploy Calorie Tracker API
+# Usage: ansible-playbook -i inventory.ini playbook.yml
+# Idempotent: safe to re-run at any time without side effects
+
+- name: Deploy Calorie Tracker API
+  hosts: app_servers
+  become: false
+  vars_files:
+    - vars.yml
+
+  pre_tasks:
+    - name: Ensure Docker is available
+      command: docker info
+      changed_when: false
+
+  roles:
+    - app
